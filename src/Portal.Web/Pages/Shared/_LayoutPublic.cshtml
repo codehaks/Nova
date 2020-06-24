@@ -1,0 +1,20 @@
+﻿@{
+    Layout = "~/pages/shared/_Layout.cshtml";
+}
+
+@section styles{
+    <link href="~/css/public.css" rel="stylesheet" asp-append-version="true" />
+    @RenderSection("styles", required: false)
+}
+
+@RenderSection("leader", required: false)
+
+<div class="container">
+
+    @RenderBody()
+
+</div>
+
+@section scripts{
+    @RenderSection("scripts", required: false)
+}

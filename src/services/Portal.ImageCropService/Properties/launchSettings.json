@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "Portal.ImageCropService": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

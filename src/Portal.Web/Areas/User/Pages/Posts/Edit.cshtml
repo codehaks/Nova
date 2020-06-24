@@ -1,0 +1,17 @@
+﻿@page
+@model Portal.Web.Areas.User.Pages.Posts.EditModel
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<form method="post">
+    <input hidden asp-for="Post.Id" />
+
+    <input asp-for="Post.Name" placeholder="Name" class="form-control" />
+    <br>
+    <textarea asp-for="Post.Description" placeholder="Year" class="form-control"></textarea>
+    <br>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a asp-page="index" class="btn btn-link">Back to list</a>
+
+</form>

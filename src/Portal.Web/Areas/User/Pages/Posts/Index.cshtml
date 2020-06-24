@@ -1,0 +1,82 @@
+﻿@page
+@model Portal.Web.Areas.User.Pages.Posts.IndexModel
+@{
+    ViewData["title"] = "My Posts";
+}
+
+@section toolbar{
+
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-page="/posts/create" asp-area="user" class="btn btn-primary">New Post</a>
+
+    </div>
+}
+
+<table class="table table-borderless table-hover table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Desc.</th>
+            <th></th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.PostList)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Description</td>
+                <td>
+                    <a class="btn btn-primary" asp-page="edit" asp-route-id="@item.Id">Edit</a>
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+@section styles{ 
+    <link href="~/lib/toastr/toastr.css" rel="stylesheet" />
+}
+
+@section scripts{
+    <script src="~/lib/vue/vue.js"></script>
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script>
+        var app = new Vue({
+            el: "#app",
+            data: {
+
+                connection: null
+            },
+            mounted: function () {
+                var vm = this;
+
+                
+
+                vm.connection = new signalR.HubConnectionBuilder()
+                    .withUrl('/notifyHub')
+                    .configureLogging(signalR.LogLevel.Information)
+                    .build();
+
+                vm.connection.start()
+                    .catch(function (err) {
+                        return console.error(err.toSting());
+                    });
+
+                toastr.info("SignalR is ready!");
+
+                vm.connection.on('sendNotification', function (message) {
+
+                    toastr.success(message);
+
+                });
+            },
+            methods: {}
+        });
+    </script>
+
+}

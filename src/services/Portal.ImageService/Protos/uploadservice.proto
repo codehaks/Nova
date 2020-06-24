@@ -1,0 +1,23 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "Portal.ImageService.Protos";
+
+package scalar;
+
+service UploadFileService {
+  rpc SendFile (Chunk) returns (SendResult);
+}
+
+message Chunk {
+        string postId=1;
+        bytes Content = 2;
+}
+
+message SendResult {
+        bool Success = 1;
+}
+
+
+
+

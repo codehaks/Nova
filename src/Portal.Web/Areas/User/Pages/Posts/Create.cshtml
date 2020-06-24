@@ -1,0 +1,42 @@
+﻿@page
+@model Portal.Web.Areas.User.Pages.Posts.CreateModel
+@{
+    ViewData["Title"] = "Create";
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Post.File">File</label>
+        <input type="file" asp-for="Post.File" class="form-control-file" />
+    </div>
+    <div class="form-group">
+        <label for="exampleFormControlSelect2">City</label>
+        <select asp-for="Post.CityId" class="form-control">
+            <option value="1">Tehran</option>
+            <option value="2">Mashad</option>
+            <option value="3">Shiraz</option>
+            <option value="4">Esfehan</option>
+            <option value="5">Tabriz</option>
+
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="exampleFormControlSelect2">Category</label>
+        <select asp-for="Post.CategoryId" class="form-control">
+            <option value="1">Restaurants</option>
+            <option value="2">Health & Mediacal</option>
+            <option value="3">Pets</option>
+            <option value="4">Home & Garden</option>
+            <option value="5">Legal</option>
+            <option value="6">Automative</option>
+            <option value="7">Financial</option>
+        </select>
+    </div>
+    <input asp-for="Post.Name" placeholder="Name" class="form-control" />
+    <br>
+    <textarea asp-for="Post.Description" placeholder="Description" class="form-control"></textarea>
+    <br>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a asp-page="index" class="btn btn-link">Back to list</a>
+
+</form>

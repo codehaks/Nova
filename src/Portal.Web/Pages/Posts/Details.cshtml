@@ -1,0 +1,77 @@
+﻿@page
+@model Portal.Web.Pages.Posts.DetailsModel
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>@Model.Post.Name</h2>
+<p>@Model.Post.Description</p>
+
+<div id="app">
+    <div class="form-inline">
+        <select class="form-control w-25" v-model="rating">
+            <option value="0" selected>Stars...</option>
+            <option value="1">One</option>
+            <option value="2">Two</option>
+            <option value="3">Three</option>
+            <option value="4">Four</option>
+            <option value="5">Five</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary" v-on:click.prevent="addPostRating">Submit</button>
+
+        <img src="http://localhost:5305/api/image/full/@Model.Post.Id" alt="@Model.Post.Name" class="img-fluid" />
+        <a asp-page="index" class="btn btn-link">Back to list</a>
+    </div>
+</div>
+
+@section styles{
+    <link href="~/lib/toastr/toastr.css" rel="stylesheet" />
+}
+
+@section scripts{
+    <script src="~/lib/vue/vue.js"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script>
+        var app = new Vue({
+            el: "#app",
+            data: {
+                rating:3
+            },
+            mounted: function () {
+                // Get rating
+            },
+            methods: {
+                addPostRating: function () {
+                    //alert("Done!");
+                    var vm = this;
+
+                    var newRating = {
+                        "postId": "@Model.Post.Id",
+                        "userId":"123",
+                        "rating": 3
+                    };
+
+                    $.ajax({
+                        url: "/api/post/rating",
+                        contentType: "application/json",
+                        //dataType: "json",
+                        data: JSON.stringify(newRating),
+                        method: "POST"
+                    })
+                        .done(function (data) {
+                            toastr.success("Post rated!");
+                        }).fail(function (err) {
+                            console.log(err);
+                        }).always(function () {
+
+                        });
+
+                },
+            }
+        });
+    </script>
+
+}
+
+
