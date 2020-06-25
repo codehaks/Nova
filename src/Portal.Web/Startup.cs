@@ -45,19 +45,11 @@ namespace Portal.Web
             services.AddHttpClient<PostClient>();
 
             services.AddSignalR();
-            
-
-            //services.AddScoped <Hub<NotificationHub>>();
 
             services.AddHostedService<NotificationWorker>();
 
             services.AddScoped<INotificationScopedService, NotificationScopedService>();
 
-              //.AddRazorPagesOptions(options =>
-              //{
-              //    options.Conventions.AuthorizeFolder("/user");
-              //    options.Conventions.AuthorizeAreaFolder("admin", "/", "RequireAdminRole");
-              //});
         }
 
         
