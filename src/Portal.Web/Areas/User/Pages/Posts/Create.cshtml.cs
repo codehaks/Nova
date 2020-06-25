@@ -11,7 +11,9 @@ using Grpc.Net.Client;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore.Design;
 using Newtonsoft.Json;
+using Polly;
 using Portal.ImageService.Protos;
 using Portal.Web.Common;
 
@@ -31,12 +33,24 @@ namespace Portal.Web.Areas.User.Pages.Posts
             Post.Id = Guid.NewGuid();
             Post.UserId = User.GetUserId();
 
-            using var channel = GrpcChannel.ForAddress("https://localhost:5303");
-            var uploadFileClient = new UploadFileService.UploadFileServiceClient(channel);           
-            await SendFile(uploadFileClient, Post.File, Post.Id.ToString());
+            var polly = Polly.Policy.Handle<Exception>()
+                .CircuitBreakerAsync(2,TimeSpan.FromSeconds(20));
+
+            await polly.ExecuteAsync(async () => {
+                using var channel = GrpcChannel.ForAddress("https://localhost:5303");
+                var uploadFileClient = new UploadFileService.UploadFileServiceClient(channel);
+               await SendFile(uploadFileClient, Post.File, Post.Id.ToString());
+            });
+
+       
 
             
-            await _postClient.Create(Post);
+            var result=await _postClient.Create(Post);
+
+            if (result==false)
+            {
+                return BadRequest();
+            }
 
             return RedirectToPage("./index");
         }

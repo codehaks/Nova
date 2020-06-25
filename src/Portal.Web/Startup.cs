@@ -45,6 +45,7 @@ namespace Portal.Web
             services.AddHttpClient<PostClient>();
 
             services.AddSignalR();
+            
 
             //services.AddScoped <Hub<NotificationHub>>();
 

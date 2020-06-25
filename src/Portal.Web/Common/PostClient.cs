@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Polly;
 using Portal.Web.Areas.User.Pages.Posts;
 using System;
 using System.Collections.Generic;
@@ -22,9 +23,21 @@ namespace Portal.Web.Common
         public async Task<bool> Create(PostCreateModel post)
         {
             var data = JsonConvert.SerializeObject(post);
-            var response = await Client.PostAsync("post", new StringContent(data, Encoding.UTF8, "application/json"));
-            response.EnsureSuccessStatusCode();
-            return true;
+
+            var polly = Policy
+                .Handle<HttpRequestException>()
+                .WaitAndRetryAsync(3, pause => TimeSpan.FromSeconds(5));
+
+
+            await polly.ExecuteAsync(async () =>
+            {
+                var response = await Client.PostAsync("post", new StringContent(data, Encoding.UTF8, "application/json"));
+                response.EnsureSuccessStatusCode();
+                return true;
+            });
+
+            return false;
+
         }
 
         public async Task<PostViewModel> Get(string postId)
