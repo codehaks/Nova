@@ -49,7 +49,7 @@ namespace Portal.Web.Areas.User.Pages.Posts
 
             if (result==false)
             {
-                return BadRequest();
+                return Page();
             }
 
             return RedirectToPage("./index");
