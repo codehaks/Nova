@@ -1,22 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Polly;
+
 using Portal.Persistence;
 using Portal.Domain;
 using Portal.Web.Common;
 using Portal.Web.Workers;
 using Portal.Web.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Portal.Web
 {
@@ -42,7 +42,9 @@ namespace Portal.Web
             services.AddRazorPages()
                 .AddRazorRuntimeCompilation();
 
-            services.AddHttpClient<PostClient>();
+            services.AddHttpClient<PostClient>()
+                .AddTransientHttpErrorPolicy(p =>
+                p.CircuitBreakerAsync(2, TimeSpan.FromSeconds(10)));
 
             services.AddSignalR();
 
