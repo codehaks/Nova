@@ -1,0 +1,71 @@
+﻿@page
+@model Portal.Web.Areas.Admin.Pages.Monitoring.IndexModel
+@{
+}
+
+<div id="app">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Service</th>
+                <th>Status</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="item in checks">
+                <td>{{item.name}}</td>
+                <td>{{item.status}}</td>
+                <td>{{item.lastCheck}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+
+@section styles{
+    <link href="~/lib/toastr/toastr.css" rel="stylesheet" />
+}
+
+@section scripts{
+    <script src="~/lib/vue/vue.js"></script>
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script>
+        var app = new Vue({
+            el: "#app",
+            data: {
+                checks:[],
+                connection: null
+            },
+            mounted: function () {
+                var vm = this;
+
+                $.ajax({ url: "/api/monitoring", method: "GET" })
+                    .done(function (data) {
+                        vm.checks = data;
+                        console.table(data);
+                    })
+
+                vm.connection = new signalR.HubConnectionBuilder()
+                    .withUrl('/monitorHub')
+                    .configureLogging(signalR.LogLevel.Information)
+                    .build();
+
+                vm.connection.start()
+                    .catch(function (err) {
+                        return console.error(err.toString());
+                    });
+                                
+                vm.connection.on('sendHealthUpdate', function (message) {
+
+                    //toastr.success(message);
+
+                });
+            },
+            methods: {}
+        });
+    </script>
+
+}

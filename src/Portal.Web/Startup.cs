@@ -49,8 +49,10 @@ namespace Portal.Web
             services.AddSignalR();
 
             services.AddHostedService<NotificationWorker>();
+            services.AddHostedService<HealthMonitoringWorker>();
 
             services.AddScoped<INotificationScopedService, NotificationScopedService>();
+            services.AddScoped<IHealthMonitoringService, HealthMonitoringService>();
 
         }
 
@@ -82,6 +84,7 @@ namespace Portal.Web
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
                 endpoints.MapHub<NotificationHub>("/notifyhub");
+                endpoints.MapHub<MonitoringHub>("/monitorhub");
             });
         }
     }
