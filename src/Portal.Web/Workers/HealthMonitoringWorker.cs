@@ -35,7 +35,7 @@ namespace Portal.Web.Workers
 
             var scopedProcessingService =
                 scope.ServiceProvider
-                    .GetRequiredService<INotificationScopedService>();
+                    .GetRequiredService<IHealthMonitoringService>();
 
             await scopedProcessingService.DoWork(stoppingToken);
         }

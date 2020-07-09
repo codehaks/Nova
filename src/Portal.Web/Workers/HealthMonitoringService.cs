@@ -12,11 +12,11 @@ namespace Portal.Web.Workers
     public class HealthMonitoringService : IHealthMonitoringService
     {
 
-        private readonly IHubContext<MonitoringHub, IMonitoringHub> _notifyHub;
-        public HealthMonitoringService(IHubContext<MonitoringHub, IMonitoringHub> notifyHub)
+        private readonly IHubContext<MonitoringHub, IMonitoringHub> _monitoringHub;
+        public HealthMonitoringService(IHubContext<MonitoringHub, IMonitoringHub> monitoringHub)
         {
 
-            _notifyHub = notifyHub;
+            _monitoringHub = monitoringHub;
         }
 
         public Task DoWork(CancellationToken stoppingToken)
@@ -31,7 +31,7 @@ namespace Portal.Web.Workers
 
         private async Task NotifyAction(RedisValue message)
         {
-            await _notifyHub.Clients.All.SendHealthUpdate(message);
+            await _monitoringHub.Clients.All.SendHealthUpdate(message);
 
         }
     }
