@@ -28,15 +28,24 @@ namespace Portal.Web.Common
                 .Handle<HttpRequestException>()
                 .WaitAndRetryAsync(3, pause => TimeSpan.FromSeconds(5));
 
-
-            await polly.ExecuteAsync(async () =>
+            bool success;
+            try
             {
-                var response = await Client.PostAsync("post", new StringContent(data, Encoding.UTF8, "application/json"));
-                response.EnsureSuccessStatusCode();
-                return true;
-            });
+                success = await polly.ExecuteAsync(async () =>
+                {
+                    var response = await Client.PostAsync("post", new StringContent(data, Encoding.UTF8, "application/json"));
+                    response.EnsureSuccessStatusCode();
+                    return true;
+                });
+            }
+            catch (Exception)
+            {
 
-            return false;
+                success = false;
+            }
+  
+
+            return success;
 
         }
 

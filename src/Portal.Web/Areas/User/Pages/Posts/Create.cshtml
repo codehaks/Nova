@@ -4,6 +4,13 @@
     ViewData["Title"] = "Create";
 }
 
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @ViewData["Error"]
+    </div>
+}
+
 <form method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label asp-for="Post.File">File</label>

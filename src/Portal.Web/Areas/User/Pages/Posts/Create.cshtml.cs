@@ -7,11 +7,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using Grpc.Core.Logging;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Polly;
 using Portal.ImageService.Protos;
@@ -22,10 +24,12 @@ namespace Portal.Web.Areas.User.Pages.Posts
     public class CreateModel : PageModel
     {
         private readonly PostClient _postClient;
+        private readonly ILogger<CreateModel> _logger;
 
-        public CreateModel(PostClient postClient)
+        public CreateModel(PostClient postClient, ILogger<CreateModel> logger)
         {
             _postClient = postClient;
+            _logger = logger;
         }
 
         public async Task<IActionResult> OnPost()
@@ -33,24 +37,50 @@ namespace Portal.Web.Areas.User.Pages.Posts
             Post.Id = Guid.NewGuid();
             Post.UserId = User.GetUserId();
 
+
             var polly = Polly.Policy.Handle<Exception>()
-                .CircuitBreakerAsync(2,TimeSpan.FromSeconds(20));
+                .WaitAndRetryAsync(2, sleep =>
+                {
+                    _logger.LogWarning($"ImageService[gRPC] connect retrying... [{sleep}]");
+                    return TimeSpan.FromSeconds(5);
+                });
 
-            await polly.ExecuteAsync(async () => {
-                using var channel = GrpcChannel.ForAddress("https://localhost:5303");
-                var uploadFileClient = new UploadFileService.UploadFileServiceClient(channel);
-               await SendFile(uploadFileClient, Post.File, Post.Id.ToString());
-            });
+            SendResult fileSendResult;
 
-       
-
-            
-            var result=await _postClient.Create(Post);
-
-            if (result==false)
+            try
             {
+                fileSendResult = await polly.ExecuteAsync(async () =>
+               {
+                   using var channel = GrpcChannel.ForAddress("https://localhost:5303");
+                   var uploadFileClient = new UploadFileService.UploadFileServiceClient(channel);
+                   var sendResult = await SendFile(uploadFileClient, Post.File, Post.Id.ToString());
+                   return sendResult;
+               });
+            }
+            catch (Exception ex)
+            {
+
+                ViewData["Error"] = "Can not send file";
+                _logger.LogCritical(ex.Message);
                 return Page();
             }
+
+
+            if (fileSendResult.Success)
+            {
+                var result = await _postClient.Create(Post);
+
+                if (result == false)
+                {
+                    return Page();
+                }
+            }
+            else
+            {
+                ViewData["Error"] = "Can not send file";
+                return Page();
+            }
+
 
             return RedirectToPage("./index");
         }
@@ -58,7 +88,7 @@ namespace Portal.Web.Areas.User.Pages.Posts
         [BindProperty]
         public PostCreateModel Post { get; set; }
 
-        private static async Task SendFile(UploadFileService.UploadFileServiceClient client, IFormFile filePath, string postId)
+        private static async Task<SendResult> SendFile(UploadFileService.UploadFileServiceClient client, IFormFile filePath, string postId)
         {
             byte[] buffer;
             var fileStream = new MemoryStream();
@@ -85,7 +115,7 @@ namespace Portal.Web.Areas.User.Pages.Posts
                 Content = ByteString.CopyFrom(buffer)
             });
 
-            Console.WriteLine(result.Success);
+            return result;
 
         }
 
