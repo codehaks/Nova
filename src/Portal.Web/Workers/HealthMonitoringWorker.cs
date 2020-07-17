@@ -28,8 +28,7 @@ namespace Portal.Web.Workers
 
         private async Task DoWork(CancellationToken stoppingToken)
         {
-            _logger.LogInformation(
-                "Consume Scoped Service Hosted Service is working.");
+            _logger.LogInformation("Health Monitoring worker is running.");
 
             var scope = Services.CreateScope();
 
