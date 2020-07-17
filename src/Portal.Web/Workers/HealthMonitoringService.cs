@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Grpc.Core.Logging;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using Portal.Web.Hubs;
 using StackExchange.Redis;
 using System;
@@ -13,19 +15,30 @@ namespace Portal.Web.Workers
     {
 
         private readonly IHubContext<MonitoringHub, IMonitoringHub> _monitoringHub;
-        public HealthMonitoringService(IHubContext<MonitoringHub, IMonitoringHub> monitoringHub)
+        private readonly ILogger<HealthMonitoringWorker> _logger;
+        public HealthMonitoringService(IHubContext<MonitoringHub, IMonitoringHub> monitoringHub, ILogger<HealthMonitoringWorker> logger)
         {
 
             _monitoringHub = monitoringHub;
+            _logger = logger;
         }
 
         public Task DoWork(CancellationToken stoppingToken)
         {
-            var redis = ConnectionMultiplexer.Connect("localhost:6379");
-            var db = redis.GetDatabase();
+            try
+            {
+                var redis = ConnectionMultiplexer.Connect("localhost:6379");
+                var db = redis.GetDatabase();
 
-            var pubsub = redis.GetSubscriber();
-            pubsub.Subscribe("health_monitor", async (channel, message) => await NotifyAction(message));
+                var pubsub = redis.GetSubscriber();
+                pubsub.Subscribe("health_monitor", async (channel, message) => await NotifyAction(message));
+            }
+            catch (Exception)
+            {
+
+                _logger.LogError("Redis is not ready for health monitoring worker");
+            }
+  
             return Task.CompletedTask;
         }
 

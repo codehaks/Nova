@@ -30,11 +30,20 @@ namespace Portal.Web.Workers
 
         public Task DoWork(CancellationToken stoppingToken)
         {
-            var redis = ConnectionMultiplexer.Connect("localhost:6379");
-            var db = redis.GetDatabase();
+            try
+            {
+                var redis = ConnectionMultiplexer.Connect("localhost:6379");
+                var db = redis.GetDatabase();
 
-            var pubsub = redis.GetSubscriber();
-            pubsub.Subscribe("post_notify", async (channel, message) => await NotifyActipn(message));
+                var pubsub = redis.GetSubscriber();
+                pubsub.Subscribe("post_notify", async (channel, message) => await NotifyActipn(message));
+            }
+            catch (Exception)
+            {
+
+                _logger.LogError("Redis not read.");
+            }
+           
             return Task.CompletedTask;
         }
 

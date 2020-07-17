@@ -35,8 +35,9 @@ namespace Portal.PostService
 
             services.Configure<HealthCheckPublisherOptions>(options =>
             {
-                options.Delay = TimeSpan.FromSeconds(3);
-                //options.Predicate = (check) => check.Tags.Contains("ready");
+                options.Delay = TimeSpan.FromSeconds(1);
+                options.Period = TimeSpan.FromSeconds(5);
+                
             });
 
             services.AddSingleton<IHealthCheckPublisher, HealthPublisher>();

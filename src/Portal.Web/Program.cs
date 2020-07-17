@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Sinks.MSSqlServer;
 
 namespace Portal.Web
 {
@@ -25,11 +26,23 @@ namespace Portal.Web
 
                     webBuilder.UseSerilog((webHostBuilderContext, logger) =>
                     {
-                        if (webHostBuilderContext.HostingEnvironment.IsProduction())
+                        logger.WriteTo.Console().MinimumLevel.Information();
+
+                        if (webHostBuilderContext.HostingEnvironment.IsDevelopment())
                         {
-                            logger.WriteTo.MSSqlServer(
-                                webHostBuilderContext.Configuration.GetSection("Logging:mssql").Value,
-                                "Logs").MinimumLevel.Error();
+              
+                            var columnOpts = new ColumnOptions();
+                            columnOpts.Store.Remove(StandardColumn.Properties);
+                            columnOpts.Store.Add(StandardColumn.LogEvent);
+                            columnOpts.LogEvent.DataLength = 2048;
+                            columnOpts.PrimaryKey = columnOpts.Id;
+                            columnOpts.Id.DataType = System.Data.SqlDbType.Int;
+                         
+
+                            logger.WriteTo
+                            .MSSqlServer(webHostBuilderContext.Configuration
+                            .GetSection("Logging:mssql").Value, "Logs",autoCreateSqlTable:true)
+                            .MinimumLevel.Information();
                         }
                         else
                         {
