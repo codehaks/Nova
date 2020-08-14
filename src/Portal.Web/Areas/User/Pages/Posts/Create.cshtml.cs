@@ -7,11 +7,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Polly;
 using Portal.ImageService.Protos;
@@ -22,10 +24,12 @@ namespace Portal.Web.Areas.User.Pages.Posts
     public class CreateModel : PageModel
     {
         private readonly PostClient _postClient;
+        private readonly IConfiguration _configuration;
 
-        public CreateModel(PostClient postClient)
+        public CreateModel(PostClient postClient, IConfiguration configuration)
         {
             _postClient = postClient;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> OnPost()
@@ -33,21 +37,16 @@ namespace Portal.Web.Areas.User.Pages.Posts
             Post.Id = Guid.NewGuid();
             Post.UserId = User.GetUserId();
 
-            var polly = Polly.Policy.Handle<Exception>()
-                .CircuitBreakerAsync(2,TimeSpan.FromSeconds(20));
+        
+            var imageservice = _configuration.GetServiceUri("portal-imageservice");
+  
+            using var channel = GrpcChannel.ForAddress(imageservice);
+            var uploadFileClient = new UploadFileService.UploadFileServiceClient(channel);
+            await SendFile(uploadFileClient, Post.File, Post.Id.ToString());
 
-            await polly.ExecuteAsync(async () => {
-                using var channel = GrpcChannel.ForAddress("https://localhost:5303");
-                var uploadFileClient = new UploadFileService.UploadFileServiceClient(channel);
-               await SendFile(uploadFileClient, Post.File, Post.Id.ToString());
-            });
+            var result = await _postClient.Create(Post);
 
-       
-
-            
-            var result=await _postClient.Create(Post);
-
-            if (result==false)
+            if (result == false)
             {
                 return Page();
             }

@@ -20,7 +20,7 @@
 
         <button type="submit" class="btn btn-primary" v-on:click.prevent="addPostRating">Submit</button>
 
-        <img src="http://localhost:5305/api/image/full/@Model.Post.Id" alt="@Model.Post.Name" class="img-fluid" />
+        <img src="@Url.Action("GetImage","Image",new { id=Model.Post.Id.ToString()})" alt="@Model.Post.Name" class="img-fluid" />
         <a asp-page="index" class="btn btn-link">Back to list</a>
     </div>
 </div>

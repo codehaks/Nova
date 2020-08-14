@@ -12,6 +12,8 @@ services:
   project: services/Portal.PostService/Portal.PostService.csproj
 - name: portal-imageservice
   project: src/services/Portal.ImageService/Portal.ImageService.csproj
+  bindings:
+  - protocol: https
 - name: portal-imagecropservice
   project: src/Services/Portal.ImageCropService/Portal.ImageCropService.csproj
 - name: portal-imagedeliveryservice
