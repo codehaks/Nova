@@ -1,0 +1,18 @@
+# tye application configuration file
+# read all about it at https://github.com/dotnet/tye
+#
+# when you've given us a try, we'd love to know what you think:
+#    https://aka.ms/AA7q20u
+#
+name: nova
+services:
+- name: portal-web
+  project: src/Portal.Web/Portal.Web.csproj
+- name: portal-postservice
+  project: services/Portal.PostService/Portal.PostService.csproj
+- name: portal-imageservice
+  project: src/services/Portal.ImageService/Portal.ImageService.csproj
+- name: portal-imagecropservice
+  project: src/Services/Portal.ImageCropService/Portal.ImageCropService.csproj
+- name: portal-imagedeliveryservice
+  project: src/services/Portal.ImageDeliveryService/Portal.ImageDeliveryService.csproj

@@ -10,9 +10,8 @@
         {
             <div class="col-sm-4">
                 <div class="card m-1">
-                   
-                        <img src="http://localhost:5305/api/image/thumb/@item.Id" alt="@item.Name" class="img-fluid" />
-                  
+                   <img src="@Url.Action("GetImage","Image",new { id=item.Id.ToString()})" alt="@item.Name" class="img-fluid"/>
+                 
                         <div class="card-body">
                             <h5 class="card-title">@item.Name</h5>
 

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Polly;
 using Portal.Web.Areas.User.Pages.Posts;
 using System;
@@ -13,11 +14,14 @@ namespace Portal.Web.Common
     public class PostClient
     {
         public HttpClient Client { get; }
+        public IConfiguration Configuration { get; }
 
-        public PostClient(HttpClient client)
+        public PostClient(HttpClient client,IConfiguration configuration)
         {
-            client.BaseAddress = new Uri("http://localhost:5301/api/");
+            var postService = configuration.GetServiceUri("portal-postservice");
+            client.BaseAddress = postService;// new Uri(postService+ "/api/");
             Client = client;
+            Configuration = configuration;
         }
 
         public async Task<bool> Create(PostCreateModel post)
@@ -31,7 +35,7 @@ namespace Portal.Web.Common
 
             await polly.ExecuteAsync(async () =>
             {
-                var response = await Client.PostAsync("post", new StringContent(data, Encoding.UTF8, "application/json"));
+                var response = await Client.PostAsync("api/post", new StringContent(data, Encoding.UTF8, "application/json"));
                 response.EnsureSuccessStatusCode();
                 return true;
             });
@@ -42,7 +46,7 @@ namespace Portal.Web.Common
 
         public async Task<PostViewModel> Get(string postId)
         {
-            var response = await Client.GetAsync("post/" + postId);
+            var response = await Client.GetAsync("api/post/" + postId);
             var post = JsonConvert.DeserializeObject<PostViewModel>
                 (await response.Content.ReadAsStringAsync());
             response.EnsureSuccessStatusCode();
@@ -62,7 +66,7 @@ namespace Portal.Web.Common
         public async Task<List<PostViewModel>> GetAll()
         {
 
-            var response = await Client.GetAsync("post");
+            var response = await Client.GetAsync("api/post");
             response.EnsureSuccessStatusCode();
             var data = await response.Content.ReadAsStringAsync();
 
@@ -81,7 +85,7 @@ namespace Portal.Web.Common
 
         public async Task<List<PostViewModel>> GetAllByUserId(string userId)
         {
-            var response = await Client.GetAsync("post/user/" + userId);
+            var response = await Client.GetAsync("api/post/user/" + userId);
             var postList = JsonConvert.DeserializeObject<List<PostViewModel>>
                 (await response.Content.ReadAsStringAsync());
             response.EnsureSuccessStatusCode();
