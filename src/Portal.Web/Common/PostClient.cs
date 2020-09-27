@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Grpc.Core.Logging;
+using Microsoft.AspNetCore.Identity.UI.V3.Pages.Internal.Account.Manage;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Polly;
 using Portal.Web.Areas.User.Pages.Posts;
@@ -15,13 +19,17 @@ namespace Portal.Web.Common
     {
         public HttpClient Client { get; }
         public IConfiguration Configuration { get; }
+        private readonly IDistributedCache _cache;
+        private readonly ILogger<PostClient> _logger;
 
-        public PostClient(HttpClient client,IConfiguration configuration)
+        public PostClient(HttpClient client,IConfiguration configuration, IDistributedCache cache, ILogger<PostClient> logger)
         {
             var postService = configuration.GetServiceUri("portal-postservice");
             client.BaseAddress = postService;// new Uri(postService+ "/api/");
             Client = client;
             Configuration = configuration;
+            _cache = cache;
+            _logger = logger;
         }
 
         public async Task<bool> Create(PostCreateModel post)
@@ -68,7 +76,25 @@ namespace Portal.Web.Common
 
             var response = await Client.GetAsync("api/post");
             response.EnsureSuccessStatusCode();
-            var data = await response.Content.ReadAsStringAsync();
+            string data;
+
+            
+            var cachedPosts = _cache.Get("posts");
+            if (cachedPosts==null)
+            {
+                data= await response.Content.ReadAsStringAsync();
+                _cache.Set("posts", Encoding.UTF8.GetBytes(data), new DistributedCacheEntryOptions
+                {
+                   AbsoluteExpirationRelativeToNow=TimeSpan.FromMinutes(10)
+                });
+                _logger.LogInformation("Data cached to redis");
+                
+            }
+            else
+            {
+                _logger.LogInformation("Data loaded from redis cache");
+                data = Encoding.UTF8.GetString(cachedPosts);
+            }
 
             List<PostViewModel> PostList;
             if (!string.IsNullOrEmpty(data))
