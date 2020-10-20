@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Sinks.MSSqlServer.Sinks.MSSqlServer.Options;
 
 namespace Portal.PostService
 {
@@ -21,6 +23,24 @@ namespace Portal.PostService
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseSerilog((builder, logger) =>
+                    {
+                        if (builder.HostingEnvironment.IsDevelopment())
+                        {
+                            logger.WriteTo.Console().MinimumLevel.Error();
+                        }
+                        else
+                        {
+                            logger.WriteTo
+                            .MSSqlServer("Data Source=.\\sqlexpress;Initial Catalog=PostServiceLogsDb;Integrated Security=True", new SinkOptions
+                            {
+                                AutoCreateSqlTable = true,
+                                TableName = "Logs"
+                            })
+                            .MinimumLevel.Error();
+                        }
+                    });
+
                 });
     }
 }
