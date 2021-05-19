@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>dotnet-Portal.ImageCropService-A02E0401-0D1F-4AAF-B9BF-E0AA0E7675DC</UserSecretsId>
   </PropertyGroup>
 
