@@ -20,7 +20,7 @@ namespace Portal.ImageService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ImageDbContext>(options =>
-               options.UseSqlServer("Data Source=localhost\\sqlexpress;Initial Catalog=Nova_ImageDb;Integrated Security=True"));
+               options.UseSqlServer("Data Source=localhost;Initial Catalog=Nova_ImageDb;Integrated Security=True"));
             services.AddGrpc();
         }
 

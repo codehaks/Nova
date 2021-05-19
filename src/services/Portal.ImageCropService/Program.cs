@@ -23,7 +23,7 @@ namespace Portal.ImageCropService
                     services.AddHostedService<Worker>();
                     services.AddScoped<IScopedProcessingService, ScopedProcessingService>();
                     services.AddDbContext<ImageDbContext>(options =>
-                options.UseSqlServer("Data Source=localhost\\sqlexpress;Initial Catalog=Nova_ImageDb;Integrated Security=True"));
+                options.UseSqlServer("Data Source=localhost;Initial Catalog=Nova_ImageDb;Integrated Security=True"));
                 });
     }
 }

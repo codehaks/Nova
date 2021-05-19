@@ -32,7 +32,7 @@ namespace Portal.PostService
                         else
                         {
                             logger.WriteTo
-                            .MSSqlServer("Data Source=.\\sqlexpress;Initial Catalog=PostServiceLogsDb;Integrated Security=True", new SinkOptions
+                            .MSSqlServer("Data Source=localhost;Initial Catalog=PostServiceLogsDb;Integrated Security=True", new SinkOptions
                             {
                                 AutoCreateSqlTable = true,
                                 TableName = "Logs"
