@@ -112,10 +112,17 @@ namespace Portal.Web.Common
         public async Task<List<PostViewModel>> GetAllByUserId(string userId)
         {
             var response = await Client.GetAsync("api/post/user/" + userId);
-            var postList = JsonConvert.DeserializeObject<List<PostViewModel>>
-                (await response.Content.ReadAsStringAsync());
-            response.EnsureSuccessStatusCode();
-            return postList;
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrEmpty( content)==false)
+            {
+                var postList = JsonConvert.DeserializeObject<List<PostViewModel>>
+                               (content);
+                response.EnsureSuccessStatusCode();
+                return postList;
+            }
+
+            return null;
+           
         }
     }
 }
